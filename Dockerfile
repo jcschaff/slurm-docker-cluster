@@ -30,6 +30,7 @@ RUN set -ex \
        autoconf \
        http-parser-devel \
        json-c-devel \
+       jansson-devel \
        munge \
        munge-devel \
        python3-devel \
@@ -78,13 +79,21 @@ RUN git clone --depth 1 --single-branch -b v2.9.4 https://github.com/nodejs/http
     && ./configure \
     && make \
     && make install \
+    && popd \
+    && git clone --depth 1 --single-branch -b v1.12.0 https://github.com/benmcollins/libjwt.git libjwt \
+    && pushd libjwt \
+    && autoreconf --force --install \
+    && ./configure --prefix=/usr/local --libdir=/usr/lib64 \
+    && make -j \
+    && make install \
     && popd
 
 RUN set -x \
     && git clone -b ${SLURM_TAG} --single-branch --depth=1 https://github.com/SchedMD/slurm.git \
     && pushd slurm \
     && ./configure --enable-debug --prefix=/usr --sysconfdir=/etc/slurm \
-        --with-mysql_config=/usr/bin --with-http-parser=/usr/local/ --with-yaml=/usr/local/ --libdir=/usr/lib64 \
+        --with-mysql_config=/usr/bin --with-http-parser=/usr/local/ \
+        --with-yaml=/usr/local/ --with-jwt=/usr/local/ --libdir=/usr/lib64 \
     && make install \
     && install -D -m644 etc/cgroup.conf.example /etc/slurm/cgroup.conf.example \
     && install -D -m644 etc/slurm.conf.example /etc/slurm/slurm.conf.example \
@@ -113,13 +122,19 @@ RUN set -x \
     && chown -R slurm:slurm /var/*/slurm* \
     && /sbin/create-munge-key
 
-COPY slurm.conf /etc/slurm/slurm.conf
 COPY slurmdbd.conf /etc/slurm/slurmdbd.conf
+COPY slurm.conf /etc/slurm/slurm.conf
 RUN set -x \
     && chown slurm:slurm /etc/slurm/slurmdbd.conf \
-    && chmod 600 /etc/slurm/slurmdbd.conf
+    && chmod 600 /etc/slurm/slurmdbd.conf \
+    && mkdir -p /etc/slurm/statesave \
+    && dd if=/dev/random of=/etc/slurm/statesave/jwt_hs256.key bs=32 count=1 \
+    && chown slurm:slurm /etc/slurm/statesave/jwt_hs256.key \
+    && chmod 0600 /etc/slurm/statesave/jwt_hs256.key \
+    && chown slurm:slurm /etc/slurm/statesave/ \
+    && chmod 0755 /etc/slurm/statesave/
 
-
+COPY start_restd_dev.sh /usr/local/bin/start_restd_dev.sh
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
