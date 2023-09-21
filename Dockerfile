@@ -13,6 +13,7 @@ RUN set -ex \
     && yum makecache \
     && yum -y update \
     && yum -y install dnf-plugins-core \
+    && yum -y install epel-release \
     && yum config-manager --set-enabled powertools \
     && yum -y install \
        wget \
@@ -35,8 +36,12 @@ RUN set -ex \
        vim-enhanced \
        http-parser-devel \
        json-c-devel \
+       libyaml-devel \
+       libjwt-devel \
     && yum clean all \
     && rm -rf /var/cache/yum
+
+RUN groupadd -r restuser && useradd -r -g restuser restuser
 
 RUN alternatives --set python /usr/bin/python3
 
@@ -51,6 +56,24 @@ RUN set -ex \
     && rm -rf "${GNUPGHOME}" /usr/local/bin/gosu.asc \
     && chmod +x /usr/local/bin/gosu \
     && gosu nobody true
+
+# RUN git clone --depth 1 --single-branch -b json-c-0.15-20200726 https://github.com/json-c/json-c \
+#     && mkdir json-c-build && cd json-c-build \
+#     && cmake ../json-c && make && sudo make install
+
+# RUN git clone --depth 1 --single-branch -b v2.9.4 https://github.com/nodejs/http-parser.git http_parser \
+#     && cd http_parser \
+#     && make && sudo make install
+
+# RUN git clone --depth 1 --single-branch -b 0.2.5 https://github.com/yaml/libyaml libyaml \
+#     && cd libyaml \
+#     && ./bootstrap && ./configure && make && make install
+
+# RUN git clone --depth 1 --single-branch -b v1.12.0 https://github.com/benmcollins/libjwt.git libjwt \
+#     && cd libjwt \
+#     && autoreconf --force --install && ./configure --prefix=/usr/local && make -j && sudo make install
+
+# ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
 
 RUN set -x \
     && git clone -b ${SLURM_TAG} --single-branch --depth=1 https://github.com/SchedMD/slurm.git \

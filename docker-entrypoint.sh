@@ -43,6 +43,28 @@ then
     fi
 fi
 
+if [ "$1" = "slurmrestd" ]
+then
+    echo "---> Starting the MUNGE Authentication service (munged) ..."
+    gosu munge /usr/sbin/munged
+
+    echo "---> Waiting for slurmctld to become active before starting slurmrestd ..."
+
+    until 2>/dev/null >/dev/tcp/slurmctld/6817
+    do
+        echo "-- slurmctld is not available.  Sleeping ..."
+        sleep 2
+    done
+    echo "-- slurmctld is now active ..."
+    export SLURMRESTD_SECURITY=disable_unshare_sysv,disable_unshare_files,disable_user_check
+    export SLURMRESTD_LISTEN=0.0.0.0:8081
+    export SLURMRESTD_AUTH_TYPES=auth/jwt
+    # random jwt token
+    export SLURM_JWT=11111.11111.1111
+    echo "---> Starting the Slurm REST API Daemon (slurmrestd) ..."
+    exec gosu restuser /usr/sbin/slurmrestd -vvv -a rest_auth/jwt 0.0.0.0:8088
+fi
+
 if [ "$1" = "slurmd" ]
 then
     echo "---> Starting the MUNGE Authentication service (munged) ..."

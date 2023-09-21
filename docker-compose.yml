@@ -46,6 +46,21 @@ services:
     depends_on:
       - "slurmdbd"
 
+  slurmrestd:
+    image: slurm-docker-cluster:${IMAGE_TAG:-21.08}
+    command: ["slurmrestd"]
+    container_name: slurmrestd
+    hostname: slurmrestd
+    volumes:
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - slurm_jobdir:/data
+      - var_log_slurm:/var/log/slurm
+    expose:
+      - "8081"
+    depends_on:
+      - "slurmdbd"
+
   c1:
     image: slurm-docker-cluster:${IMAGE_TAG:-21.08}
     command: ["slurmd"]
