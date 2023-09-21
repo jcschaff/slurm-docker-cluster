@@ -27,20 +27,7 @@ The compose file will create the following named volumes:
 Build the image locally:
 
 ```console
-docker build -t slurm-docker-cluster:21.08.6 .
-```
-
-Build a different version of Slurm using Docker build args and the Slurm Git
-tag:
-
-```console
-docker build --build-arg SLURM_TAG="slurm-19-05-2-1" -t slurm-docker-cluster:19.05.2 .
-```
-
-Or equivalently using `docker-compose`:
-
-```console
-SLURM_TAG=slurm-19-05-2-1 IMAGE_TAG=19.05.2 docker-compose build
+docker build --build-arg SLURM_TAG="slurm-21-08-6-1" --build-arg PROXY="${http_proxy}" -t slurm-docker-cluster:21.08.6 .
 ```
 
 
@@ -49,7 +36,7 @@ SLURM_TAG=slurm-19-05-2-1 IMAGE_TAG=19.05.2 docker-compose build
 Run `docker-compose` to instantiate the cluster:
 
 ```console
-IMAGE_TAG=19.05.2 docker-compose up -d
+IMAGE_TAG=21.08.6 docker compose up -d
 ```
 
 ## Register the Cluster with SlurmDBD
@@ -97,6 +84,27 @@ Submitted batch job 2
 [root@slurmctld data]# ls
 slurm-2.out
 ```
+
+## Use Slurm REST API
+
+Start `slurmrestd` from the slurmctld container bash shell:
+
+```console
+[root@slurmctld /]# start_restd_dev.sh
+```
+
+Create a JWT for user `restd`:
+
+```console
+[root@slurmctld /]# scontrol token username=restd
+```
+
+Access:
+
+```console
+curl -H "X-SLURM-USER-NAME:restd" -H "X-SLURM-USER-TOKEN:xxx" http://host:6888/openapi/v3
+```
+
 
 ## Stopping and Restarting the Cluster
 
