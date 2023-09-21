@@ -27,7 +27,7 @@ The compose file will create the following named volumes:
 Build the image locally:
 
 ```console
-docker build --build-arg SLURM_TAG="slurm-21-08-6-1" --build-arg PROXY="${http_proxy}" -t slurm-docker-cluster:21.08.6 .
+docker build --build-arg SLURM_TAG="slurm-21-08-6-1" -t slurm-docker-cluster:21.08.6 .
 ```
 
 
