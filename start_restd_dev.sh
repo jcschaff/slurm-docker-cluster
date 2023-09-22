@@ -7,4 +7,4 @@ if id -u "${username}" >/dev/null 2>&1; then
 else
   useradd "${username}"
 fi
-SLURM_JWT=daemon gosu "${username}" bash -c "/usr/sbin/slurmrestd 0.0.0.0:6888 -vvv"
+SLURM_JWT=daemon gosu "${username}" bash -c "/usr/sbin/slurmrestd 0.0.0.0:6888 -a rest_auth/jwt -vvv"
