@@ -36,6 +36,7 @@ services:
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
+    privileged: true
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
@@ -43,6 +44,8 @@ services:
       - var_log_slurm:/var/log/slurm
     expose:
       - "6817"
+    ports:
+      - "6888:6888"
     depends_on:
       - "slurmdbd"
 
