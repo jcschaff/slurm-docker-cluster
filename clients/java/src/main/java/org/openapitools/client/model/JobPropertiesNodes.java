@@ -64,8 +64,8 @@ public class JobPropertiesNodes extends AbstractOpenApiSchema {
             final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
             final TypeAdapter<Integer> adapterInteger = gson.getDelegateAdapter(this, TypeToken.get(Integer.class));
 
-            final Type typeInstance = new TypeToken<List<>>(){}.getType();
-            final TypeAdapter<List<Integer>> adapterList = (TypeAdapter<List<>>) gson.getDelegateAdapter(this, TypeToken.get(typeInstance));
+            final Type typeInstance = new TypeToken<List<Integer>>(){}.getType();
+            final TypeAdapter<List<Integer>> adapterList = (TypeAdapter<List<Integer>>) gson.getDelegateAdapter(this, TypeToken.get(typeInstance));
 
             return (TypeAdapter<T>) new TypeAdapter<JobPropertiesNodes>() {
                 @Override
@@ -83,11 +83,10 @@ public class JobPropertiesNodes extends AbstractOpenApiSchema {
                     }
                     // check if the actual instance is of the type `List<Integer>`
                     if (value.getActualInstance() instanceof List<?>) {
-                      JsonPrimitive primitive = adapterList<Integer>.toJsonTree((List<Integer>)value.getActualInstance()).getAsJsonPrimitive();
+                      JsonPrimitive primitive = adapterList.toJsonTree((List<Integer>)value.getActualInstance()).getAsJsonPrimitive();
                       elementAdapter.write(out, primitive);
-                      return;
                       List<?> list = (List<?>) value.getActualInstance();
-        	            if(list.get(0) instanceof ) {
+        	            if(list.get(0) instanceof List) {
         		            JsonArray array = adapterList.toJsonTree((List<Integer>)value.getActualInstance()).getAsJsonArray();
                         elementAdapter.write(out, array);
                         return;
@@ -125,7 +124,7 @@ public class JobPropertiesNodes extends AbstractOpenApiSchema {
                       if(!jsonElement.getAsJsonPrimitive().isNumber()) {
                         throw new IllegalArgumentException(String.format("Expected json element to be of type Number in the JSON string but got `%s`", jsonElement.toString()));
                       }
-                      actualAdapter = adapterList<Integer>;
+                      actualAdapter = adapterList;
                       if (!jsonElement.isJsonArray()) {
                         throw new IllegalArgumentException(String.format("Expected json element to be a array type in the JSON string but got `%s`", jsonElement.toString()));
                       }
@@ -201,7 +200,7 @@ public class JobPropertiesNodes extends AbstractOpenApiSchema {
 
         if (instance instanceof List<?>) {
             List<?> list = (List<?>) instance;
-        	if(list.get(0) instanceof ) {
+        	if(list.get(0) instanceof Integer) {
         		super.setActualInstance(instance);
         		return;
         	}
