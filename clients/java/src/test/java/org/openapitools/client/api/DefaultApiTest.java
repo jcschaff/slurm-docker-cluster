@@ -13,22 +13,37 @@
 
 package org.openapitools.client.api;
 
-import org.openapitools.client.ApiException;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.openapitools.client.ApiException;
+import org.openapitools.client.Configuration;
+import org.openapitools.client.auth.ApiKeyAuth;
 
 /**
  * API tests for DefaultApi
  */
-@Disabled
+
 public class DefaultApiTest {
 
-    private final DefaultApi api = new DefaultApi();
+    DefaultApi api = new DefaultApi();
+
+    @BeforeAll
+    public static void setUp() {
+        Configuration.getDefaultApiClient().setBasePath("http://localhost:6888");
+
+        // set SLURM_JWT by executing the following command (if running a local docker-compose)
+        // docker exec -it slurmctld bash -c "scontrol token username=restd"
+
+        String SLURM_JWT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
+                ".eyJleHAiOjE2OTU2NzcyODYsImlhdCI6MTY5NTY3NTQ4Niwic3VuIjoicmVzdGQifQ" +
+                ".cITYNIvOvLe1OZaCatzdTv9OajoMA2EUk7vhOyxGHVo";
+
+        ApiKeyAuth user = (ApiKeyAuth) Configuration.getDefaultApiClient().getAuthentication("user");
+        user.setApiKey("restd");
+
+        ApiKeyAuth token = (ApiKeyAuth) Configuration.getDefaultApiClient().getAuthentication("token");
+        token.setApiKey(SLURM_JWT);
+    }
 
     /**
      * Retrieve OpenAPI Specification

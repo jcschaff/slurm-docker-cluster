@@ -102,7 +102,7 @@ Create a JWT for user `restd`:
 Access:
 
 ```console
-curl -H "X-SLURM-USER-NAME:restd" -H "X-SLURM-USER-TOKEN:xxx" http://host:6888/openapi/v3
+curl -H "X-SLURM-USER-NAME:restd" -H "X-SLURM-USER-TOKEN:${SLURM_JWT}" http://localhost:6888/openapi/v3
 ```
 
 

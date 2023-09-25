@@ -13,7 +13,10 @@
 
 package org.openapitools.client.api;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.openapitools.client.ApiException;
+import org.openapitools.client.Configuration;
+import org.openapitools.client.auth.ApiKeyAuth;
 import org.openapitools.client.model.Dbv0037AccountInfo;
 import org.openapitools.client.model.Dbv0037AccountResponse;
 import org.openapitools.client.model.Dbv0037AssociationsInfo;
@@ -50,10 +53,7 @@ import org.openapitools.client.model.V0037Signal;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * API tests for SlurmApi
@@ -62,6 +62,24 @@ import java.util.Map;
 public class SlurmApiTest {
 
     private final SlurmApi api = new SlurmApi();
+
+    @BeforeAll
+    public static void setup(){
+        Configuration.getDefaultApiClient().setBasePath("http://localhost:6888");
+
+        // set SLURM_JWT by executing the following command (if running a local docker-compose)
+        // docker exec -it slurmctld bash -c "scontrol token username=restd"
+
+        String SLURM_JWT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
+                ".eyJleHAiOjE2OTU2NzcyODYsImlhdCI6MTY5NTY3NTQ4Niwic3VuIjoicmVzdGQifQ" +
+                ".cITYNIvOvLe1OZaCatzdTv9OajoMA2EUk7vhOyxGHVo";
+
+        ApiKeyAuth user = (ApiKeyAuth) Configuration.getDefaultApiClient().getAuthentication("user");
+        user.setApiKey("restd");
+
+        ApiKeyAuth token = (ApiKeyAuth) Configuration.getDefaultApiClient().getAuthentication("token");
+        token.setApiKey(SLURM_JWT);
+    }
 
     /**
      * cancel or signal job
@@ -203,9 +221,24 @@ public class SlurmApiTest {
      */
     @Test
     public void slurmctldSubmitJobTest() throws ApiException {
-        V0037JobSubmission v0037JobSubmission = null;
-        V0037JobSubmissionResponse response = api.slurmctldSubmitJob(v0037JobSubmission);
-        // TODO: test validations
+        V0037JobProperties job = new V0037JobProperties();
+        //job.setAccount("restd");
+        job.setName("test");
+        job.setTasks(1);
+        job.currentWorkingDirectory("/home/restd");
+
+        V0037JobSubmission jobSubmission = new V0037JobSubmission();
+        jobSubmission.setScript("#!/bin/bash\n sleep 15");
+        jobSubmission.setJob(job);
+
+        try {
+            V0037JobSubmissionResponse response = api.slurmctldSubmitJob(jobSubmission);
+            System.out.println(response);
+            // TODO: test validations
+        } catch (ApiException e) {
+            System.out.println(e.getResponseBody());
+            throw e;
+        }
     }
 
     /**
